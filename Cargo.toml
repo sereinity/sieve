@@ -1,0 +1,6 @@
+[package]
+name = "sieve"
+version = "0.1.0"
+authors = ["Benoît Marcelin <sereinity@sereinity.fr>"]
+
+[dependencies]
