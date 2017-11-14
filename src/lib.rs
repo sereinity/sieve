@@ -13,7 +13,7 @@ impl Space {
 
     pub fn sieve_prime(&mut self, prime: usize) {
         let from = 2;
-        let to = 16;
+        let to = self.data.len();
         let mut i = from;
         loop {
             let multiple = prime * i;
