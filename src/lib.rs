@@ -32,7 +32,7 @@ impl Space {
     }
 
     fn iter_primes<'a>(&'a self) -> impl Iterator<Item=usize> + 'a {
-        self.data.iter().enumerate().filter(|&(_, item)| {!*item}).map(|(i, _)| {i})
+        self.data.iter().enumerate().filter(|&(_, item)| {!*item}).map(|(i, _)| {i}).skip(2)
     }
 
     pub fn compute_all(&mut self) {
