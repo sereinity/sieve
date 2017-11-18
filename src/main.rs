@@ -23,7 +23,7 @@ fn main() {
         .arg(Arg::with_name("no-display")
              .long("--no-display")
              .short("-q")
-             .help("don't display the result")
+             .help("Don't display the result")
              )
         .arg(Arg::with_name("v")
              .short("v")
@@ -32,7 +32,13 @@ fn main() {
              )
         .get_matches();
 
-    let lfilter = slog::Level::from_usize(matches.occurrences_of("v") as usize + 3).unwrap();
+    // First "v" adds debug, the second trace, trace is not available directly
+    // As there isn't more log levels, we limits to 2 level of more verbosity
+    let mut digit_log_level = matches.occurrences_of("v") as usize;
+    if digit_log_level > 2 {
+        digit_log_level = 2;
+    }
+    let lfilter = slog::Level::from_usize(digit_log_level + slog::Level::Info.as_usize()).unwrap();
     let decorator = slog_term::TermDecorator::new().build();
     let drain = slog_term::FullFormat::new(decorator).build().fuse();
     let drain = slog::LevelFilter::new(drain, lfilter).map(slog::Fuse);
