@@ -5,9 +5,9 @@ pub struct Space {
 }
 
 impl Space {
-    pub fn new(size: usize) -> Space {
+    pub fn new(power: u32) -> Space {
         Space{
-            data: vec!(false; size),
+            data: vec!(false; 2usize.pow(power)),
         }
     }
 
