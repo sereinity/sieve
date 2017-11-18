@@ -12,17 +12,14 @@ impl Space {
     }
 
     pub fn sieve_prime(&mut self, prime: usize) {
-        let from = 2;
+        let iterator = 2..self.data.len();
         let to = self.data.len();
-        let mut i = from;
-        loop {
+        for i in iterator {
             let multiple = prime * i;
             if multiple >= to {
                 break;
             }
-
-            self.data[multiple] = true;
-            i += 1;
+            self.data[prime * i] = true;
         }
     }
 
