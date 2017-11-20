@@ -1,43 +1,154 @@
 #![feature(conservative_impl_trait)]
 
+#[macro_use]
+extern crate slog;
+
+use std::collections::VecDeque;
+
+// Can change this parameter, the minimal minimal is 1, but it generates a bug on «4»
+// const MINIMAL_BATCH_SIZE: u32 = 10;  // used as 2^MINIMAL_BATCH_SIZE
+const MINIMAL_BATCH_SIZE: u32 = 2;  // used as 2^MINIMAL_BATCH_SIZE
+
 pub struct Space {
-    data: Vec<bool>,
+    batches: VecDeque<Batch>,
+    computed: Vec<Batch>,
 }
 
 impl Space {
-    pub fn new(power: u32) -> Space {
-        Space{
-            data: vec!(false; 2usize.pow(power)),
+    pub fn new(power: u32, log: &slog::Logger) -> Space {
+        let mut batches = VecDeque::with_capacity(32);
+        // Space allocation, can be threaded
+        let mut starter = 0;
+        for i in 0..batch_count(power) {
+            debug!(log, "Allocationg {} size {}", i, MINIMAL_BATCH_SIZE + i);
+            batches.push_back(Batch::new(MINIMAL_BATCH_SIZE + i, starter));
+            starter += 2usize.pow(MINIMAL_BATCH_SIZE + i);
+        }
+        Space {
+            batches,
+            computed: Vec::with_capacity(32),
         }
     }
 
-    pub fn sieve_prime(&mut self, prime: usize) {
-        let iterator = 2..self.data.len();
-        let to = self.data.len();
-        for i in iterator {
-            let multiple = prime * i;
-            if multiple >= to {
-                break;
-            }
-            self.data[prime * i] = true;
+    pub fn compute_all(&mut self) {
+        while let Some(mut batch) = self.batches.pop_front() {
+            batch.run(&self.computed);
+            self.computed.push(batch);
         }
     }
 
     pub fn display_primes(&self) {
-        print!("Primes: ");
-        for prime in self.iter_primes() {
-            print!("{} ", prime);
+        for batch in self.computed.iter() {
+            batch.display_primes();
+        }
+    }
+}
+
+struct Batch {
+    data: Vec<bool>,
+    start: usize,
+}
+
+impl Batch {
+    fn new(power: u32, starter: usize) -> Batch {
+        Batch {
+            data: vec!(false; 2usize.pow(power)),
+            start: starter,
+        }
+    }
+
+    fn sieve_prime(&mut self, prime: usize) {
+        let to = self.start + self.data.len();
+        // println!("Sieve: start = {}, prime = {}", self.start, prime);
+        for i in 2..to {
+            let multiple = prime * i;
+            if multiple >= to {
+                break;
+            }
+            if multiple < self.start {
+                continue;
+            }
+            // println!("multiple: {}", multiple);
+            self.data[multiple - self.start] = true;
+        }
+    }
+
+    fn display_primes(&self) {
+        print!("{:08}: ", self.start);
+        for dot in self.dot_stream() {
+            print!("{}", dot);
         }
         println!("");
     }
 
-    fn iter_primes<'a>(&'a self) -> impl Iterator<Item=usize> + 'a {
-        self.data.iter().enumerate().filter(|&(_, item)| {!*item}).map(|(i, _)| {i}).skip(2)
+    fn dot_stream<'a>(&'a self) -> impl Iterator<Item=char> + 'a {
+        self.data.iter()
+            .map(|i| {
+                if *i {
+                    ' '
+                } else {
+                    '.'
+                }
+            })
     }
 
-    pub fn compute_all(&mut self) {
-        for i in 2..self.data.len() {
-            self.sieve_prime(i);
+    fn iter_primes<'a>(&'a self) -> impl Iterator<Item=usize> + 'a {
+        let start = self.start;
+        self.data.iter().enumerate().filter(|&(_, item)| {!*item}).map(move |(i, _)| {i + start})
+    }
+
+    fn run(&mut self, computed: &Vec<Batch>) {
+        if self.start == 0 {  // incompatible with MINIMAL_BATCH_SIZE = 1
+            self.data[0] = true;
+            self.data[1] = true;
+            let to = self.data.len();
+            for i in 2..to {
+                if i.pow(2) > to {
+                    break;
+                }
+                self.sieve_prime(i);
+            }
+        } else {
+            let to = self.start + self.data.len();
+            for batch in computed.iter() {
+                for prime in batch.iter_primes() {
+                    if prime.pow(2) > to {
+                        break;
+                    }
+                    self.sieve_prime(prime);
+                }
+            }
         }
+    }
+}
+
+/// Compute a number of batches to work on number of the maximum size of 2^power.
+///
+/// The first expected batch size is MINIMAL_BATCH_SIZE, the each batches double.
+fn batch_count(power: u32) -> u32 {
+    power.saturating_sub(MINIMAL_BATCH_SIZE - 1) + 1
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_short_batch_count() {
+        assert_eq!(batch_count(4), 1);
+    }
+
+    #[test]
+    fn test_normal_batch_count() {
+        assert_eq!(batch_count(10), 2);
+        assert_eq!(batch_count(16), 8);
+    }
+
+    #[test]
+    fn test_huge_batch_count() {
+        // For values having more than usize size
+        assert_eq!(batch_count(128), 120);
+        assert_eq!(batch_count(4096), 4088);
     }
 }
