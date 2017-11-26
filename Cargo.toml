@@ -5,6 +5,6 @@ authors = ["Benoît Marcelin <sereinity@sereinity.fr>"]
 
 [dependencies]
 clap = "^2"
-slog = "^2"
+slog = {version = "^2", features = ["max_level_trace"]}
 slog-async = "^2"
 slog-term = "^2"

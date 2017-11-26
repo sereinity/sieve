@@ -18,25 +18,34 @@ const MINIMAL_BATCH_SIZE: u32 = 2;  // used as 2^MINIMAL_BATCH_SIZE
 pub struct Space {
     batches: VecDeque<Batch>,
     computed: Vec<Batch>,
+    log: slog::Logger,
 }
 
 impl Space {
-    pub fn new(power: u32, log: &slog::Logger) -> Space {
+    pub fn new(power: u32, log: slog::Logger) -> Space {
+        debug!(log, "Initialize");
         let mut batches = VecDeque::with_capacity(32);
         // Space allocation, can be threaded
         let mut starter = 0;
         for i in 0..batch_count(power) {
             debug!(log, "Allocationg {} size {}", i, MINIMAL_BATCH_SIZE + i);
-            batches.push_back(Batch::new(MINIMAL_BATCH_SIZE + i, starter));
+            batches.push_back(Batch::new(
+                    MINIMAL_BATCH_SIZE + i,
+                    starter,
+                    log.new(o!(
+                            "Start"=> starter,
+                            "Size" => MINIMAL_BATCH_SIZE + i))));
             starter += 2usize.pow(MINIMAL_BATCH_SIZE + i);
         }
         Space {
             batches,
             computed: Vec::with_capacity(32),
+            log,
         }
     }
 
     pub fn compute_all(&mut self) {
+        debug!(self.log, "Compute …");
         while let Some(mut batch) = self.batches.pop_front() {
             batch.run(&self.computed);
             self.computed.push(batch);
@@ -53,19 +62,21 @@ impl Space {
 struct Batch {
     data: Vec<bool>,
     start: usize,
+    log: slog::Logger,
 }
 
 impl Batch {
-    fn new(power: u32, starter: usize) -> Batch {
+    fn new(power: u32, starter: usize, log: slog::Logger) -> Batch {
         Batch {
             data: vec!(false; 2usize.pow(power)),
             start: starter,
+            log,
         }
     }
 
     fn sieve_prime(&mut self, prime: usize) {
         let to = self.start + self.data.len();
-        // println!("Sieve: start = {}, prime = {}", self.start, prime);
+        trace!(self.log, "Sieve: from = {}, prime = {}", from, prime);
         for i in 2..to {
             let multiple = prime * i;
             if multiple >= to {
@@ -74,7 +85,6 @@ impl Batch {
             if multiple < self.start {
                 continue;
             }
-            // println!("multiple: {}", multiple);
             self.data[multiple - self.start] = true;
         }
     }
@@ -136,10 +146,12 @@ fn batch_count(power: u32) -> u32 {
 }
 
 /// Generate a root logger
+///
+/// Log levels are between 0 and 2 which means Info, Debug, Trace
 pub fn get_root_logger(digit_log_level: usize) -> slog::Logger{
     let lfilter = slog::Level::from_usize(digit_log_level + slog::Level::Info.as_usize()).unwrap();
     let decorator = slog_term::TermDecorator::new().build();
-    let drain = slog_term::FullFormat::new(decorator).build().fuse();
+    let drain = slog_term::CompactFormat::new(decorator).build().fuse();
     let drain = slog::LevelFilter::new(drain, lfilter).map(slog::Fuse);
     let drain = slog_async::Async::new(drain).build().fuse();
     slog::Logger::root(drain, o!())
@@ -173,7 +185,8 @@ mod tests {
     fn test_20_performance(b: &mut Bencher) {
         let log = get_root_logger(0);
         b.iter(move || {
-            Space::new(20, &log);
+            let log = log.clone();
+            Space::new(20, log);
         });
     }
 }

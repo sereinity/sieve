@@ -44,9 +44,7 @@ fn main() {
         }
     });
 
-    debug!(log, "Initialize");
-    let mut space = sieve::Space::new(size, &log);
-    debug!(log, "Compute …");
+    let mut space = sieve::Space::new(size, log.new(o!("Space" => 1)));
     space.compute_all();
     if !matches.is_present("no-display") {
         space.display_primes();

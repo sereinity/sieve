@@ -12,7 +12,7 @@
   - [ ] Minimal batch size of 1 generates a bug on «4»
 
 ### User interface
-  - [ ] Deep logging
+  - [X] Deep logging
   - [ ] Alternative print in Hexa instead of dots
 
 ### Multi-threading
