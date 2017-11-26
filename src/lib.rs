@@ -75,9 +75,13 @@ impl Batch {
     }
 
     fn sieve_prime(&mut self, prime: usize) {
+        let from = match self.start {
+            0 => 2,
+            _ => self.start / prime,
+        };
         let to = self.start + self.data.len();
         trace!(self.log, "Sieve: from = {}, prime = {}", from, prime);
-        for i in 2..to {
+        for i in from..to {
             let multiple = prime * i;
             if multiple >= to {
                 break;
