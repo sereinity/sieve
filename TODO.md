@@ -6,6 +6,7 @@
   - Dynamic vector capacity
   - Don't over allocates batches
   - Change storage engine to `Vec<usize>`
+  - Don't loop from two for each prime, estimate a good starting point
 
 ### Bug
   - Minimal batch size of 1 generates a bug on «4»
