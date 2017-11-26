@@ -1,9 +1,13 @@
 #![feature(conservative_impl_trait)]
 
+use std::collections::VecDeque;
+
 #[macro_use]
 extern crate slog;
+extern crate slog_async;
+extern crate slog_term;
+use slog::Drain;
 
-use std::collections::VecDeque;
 
 // Can change this parameter, the minimal minimal is 1, but it generates a bug on «4»
 // const MINIMAL_BATCH_SIZE: u32 = 10;  // used as 2^MINIMAL_BATCH_SIZE
@@ -127,6 +131,16 @@ impl Batch {
 /// The first expected batch size is MINIMAL_BATCH_SIZE, the each batches double.
 fn batch_count(power: u32) -> u32 {
     power.saturating_sub(MINIMAL_BATCH_SIZE - 1) + 1
+}
+
+/// Generate a root logger
+pub fn get_root_logger(digit_log_level: usize) -> slog::Logger{
+    let lfilter = slog::Level::from_usize(digit_log_level + slog::Level::Info.as_usize()).unwrap();
+    let decorator = slog_term::TermDecorator::new().build();
+    let drain = slog_term::FullFormat::new(decorator).build().fuse();
+    let drain = slog::LevelFilter::new(drain, lfilter).map(slog::Fuse);
+    let drain = slog_async::Async::new(drain).build().fuse();
+    slog::Logger::root(drain, o!())
 }
 
 

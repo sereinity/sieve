@@ -2,13 +2,10 @@
 extern crate clap;
 #[macro_use]
 extern crate slog;
-extern crate slog_async;
-extern crate slog_term;
 
 extern crate sieve;
 
 use clap::{App, Arg, ErrorKind};
-use slog::Drain;
 
 fn main() {
 
@@ -38,12 +35,7 @@ fn main() {
     if digit_log_level > 2 {
         digit_log_level = 2;
     }
-    let lfilter = slog::Level::from_usize(digit_log_level + slog::Level::Info.as_usize()).unwrap();
-    let decorator = slog_term::TermDecorator::new().build();
-    let drain = slog_term::FullFormat::new(decorator).build().fuse();
-    let drain = slog::LevelFilter::new(drain, lfilter).map(slog::Fuse);
-    let drain = slog_async::Async::new(drain).build().fuse();
-    let log = slog::Logger::root(drain, o!());
+    let log = sieve::get_root_logger(digit_log_level);
 
     let size = value_t!(matches, "size", u32).unwrap_or_else(|e|{
         match e.kind {
