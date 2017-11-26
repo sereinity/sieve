@@ -1,4 +1,6 @@
 #![feature(conservative_impl_trait)]
+#![feature(test)]
+extern crate test;
 
 use std::collections::VecDeque;
 
@@ -145,8 +147,9 @@ pub fn get_root_logger(digit_log_level: usize) -> slog::Logger{
 
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
+    use test::Bencher;
 
     #[test]
     fn test_short_batch_count() {
@@ -164,5 +167,13 @@ mod test {
         // For values having more than usize size
         assert_eq!(batch_count(128), 120);
         assert_eq!(batch_count(4096), 4088);
+    }
+
+    #[bench]
+    fn test_20_performance(b: &mut Bencher) {
+        let log = get_root_logger(0);
+        b.iter(move || {
+            Space::new(20, &log);
+        });
     }
 }
