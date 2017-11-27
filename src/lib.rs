@@ -11,9 +11,9 @@ extern crate slog_term;
 use slog::Drain;
 
 
-// Can change this parameter, the minimal minimal is 1, but it generates a bug on «4»
+// Can change this parameter, the minimal minimal is 1
 // const MINIMAL_BATCH_SIZE: u32 = 10;  // used as 2^MINIMAL_BATCH_SIZE
-const MINIMAL_BATCH_SIZE: u32 = 2;  // used as 2^MINIMAL_BATCH_SIZE
+const MINIMAL_BATCH_SIZE: u32 = 1;  // used as 2^MINIMAL_BATCH_SIZE
 
 pub struct Space {
     batches: VecDeque<Batch>,
