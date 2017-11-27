@@ -13,7 +13,7 @@
 
 ### User interface
   - [X] Deep logging
-  - [ ] Alternative print in Hexa instead of dots
+  - [X] Alternative print in Hexa instead of dots
 
 ### Multi-threading
   - [ ] Allocations

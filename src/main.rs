@@ -22,6 +22,10 @@ fn main() {
              .short("-q")
              .help("Don't display the result")
              )
+        .arg(Arg::with_name("dots")
+             .long("--dots")
+             .help("Display dots instead of values")
+             )
         .arg(Arg::with_name("v")
              .short("v")
              .multiple(true)
@@ -47,6 +51,6 @@ fn main() {
     let mut space = sieve::Space::new(size, log.new(o!("Space" => 1)));
     space.compute_all();
     if !matches.is_present("no-display") {
-        space.display_primes();
+        space.display_primes(matches.is_present("dots"));
     }
 }

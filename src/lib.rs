@@ -52,17 +52,28 @@ impl Space {
         }
     }
 
-    pub fn display_primes(&self) {
+    pub fn display_primes(&self, dots: bool) {
         let last = self.computed.last().unwrap();
         let longest = format!("{}", last.start + last.data.len() - 1);
         let longest = longest.len();
-        for batch in self.computed.iter() {
-            println!(
-                "{:0size$}-{:0size$}: {}",
-                batch.start,
-                batch.start + batch.data.len() - 1,
-                batch,
-                size=longest);
+        if ! dots {
+            for batch in self.computed.iter() {
+                println!(
+                    "{:0size$}-{:0size$}: {:#}",
+                    batch.start,
+                    batch.start + batch.data.len() - 1,
+                    batch,
+                    size=longest);
+            }
+        } else {
+            for batch in self.computed.iter() {
+                println!(
+                    "{:0size$}-{:0size$}: {:}",
+                    batch.start,
+                    batch.start + batch.data.len() - 1,
+                    batch,
+                    size=longest);
+            }
         }
     }
 }
@@ -155,8 +166,14 @@ impl Batch {
 
 impl std::fmt::Display for Batch {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        for dot in self.dot_stream() {
-            write!(f, "{}", dot)?;
+        if f.alternate() {
+            for prime in self.iter_primes() {
+                write!(f, "{} ", prime)?;
+            }
+        } else {
+            for dot in self.dot_stream() {
+                write!(f, "{}", dot)?;
+            }
         }
         write!(f, "")
     }
