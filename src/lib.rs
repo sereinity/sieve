@@ -53,8 +53,16 @@ impl Space {
     }
 
     pub fn display_primes(&self) {
+        let last = self.computed.last().unwrap();
+        let longest = format!("{}", last.start + last.data.len() - 1);
+        let longest = longest.len();
         for batch in self.computed.iter() {
-            batch.display_primes();
+            println!(
+                "{:0size$}-{:0size$}: {}",
+                batch.start,
+                batch.start + batch.data.len() - 1,
+                batch,
+                size=longest);
         }
     }
 }
@@ -89,16 +97,9 @@ impl Batch {
             if multiple < self.start {
                 continue;
             }
+            // trace!(self.log, "Strike {}", multiple);
             self.data[multiple - self.start] = true;
         }
-    }
-
-    fn display_primes(&self) {
-        print!("{:08}: ", self.start);
-        for dot in self.dot_stream() {
-            print!("{}", dot);
-        }
-        println!("");
     }
 
     fn dot_stream<'a>(&'a self) -> impl Iterator<Item=char> + 'a {
@@ -142,6 +143,17 @@ impl Batch {
         debug!(self.log, "Completed: {:?}", self);
     }
 }
+
+
+impl std::fmt::Display for Batch {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        for dot in self.dot_stream() {
+            write!(f, "{}", dot)?;
+        }
+        write!(f, "")
+    }
+}
+
 
 impl std::fmt::Debug for Batch {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
