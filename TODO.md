@@ -9,7 +9,7 @@
   - [X] Don't loop from two for each prime, estimate a good starting point
 
 ### Bug
-  - [ ] Minimal batch size of 1 generates a bug on «4»
+  - [X] Minimal batch size of 1 generates a bug on «4»
 
 ### User interface
   - [X] Deep logging

@@ -83,10 +83,10 @@ impl Batch {
     }
 
     fn sieve_prime(&mut self, prime: usize) {
-        let from = match self.start {
-            0 => 2,
-            _ => self.start / prime,
-        };
+        let mut from = self.start / prime;
+        if from < 2 {
+            from = 2;
+        }
         let to = self.start + self.data.len();
         trace!(self.log, "Sieve: from = {}, prime = {}", from, prime);
         for i in from..to {
@@ -119,9 +119,17 @@ impl Batch {
     }
 
     fn run(&mut self, computed: &Vec<Batch>) {
-        if self.start == 0 {  // incompatible with MINIMAL_BATCH_SIZE = 1
-            self.data[0] = true;
-            self.data[1] = true;
+        // 0 and 1 can't be marked automatically, mark them if there are included
+        // then sieve on every number, not just prime from previous batches because there isn't
+        if self.start <= 2 {
+            if self.start == 0 {  // mark 0 and perhaps 1 if included in this batch
+                self.data[0] = true;
+                if self.data.len() > 1 {
+                    self.data[1] = true;
+                }
+            } else if self.start == 1 {  // mark 1
+                self.data[0] = true;
+            }  // else nothing to mark
             let to = self.data.len();
             for i in 2..to {
                 if i.pow(2) > to {
