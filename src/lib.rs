@@ -11,9 +11,14 @@ extern crate slog_term;
 use slog::Drain;
 
 
-// Can change this parameter, the minimal minimal is 1
-// const MINIMAL_BATCH_SIZE: u32 = 10;  // used as 2^MINIMAL_BATCH_SIZE
-const MINIMAL_BATCH_SIZE: u32 = 1;  // used as 2^MINIMAL_BATCH_SIZE
+/// As batches double from one to another, we need a starting point
+/// MINIMAL_BATCH_SIZE allow us to tune this initial batch size.
+/// Technically any number ≥ 1 is possible, but a huge batch size can reduce performance by
+/// allocating too much continues memory.
+///
+/// The value is interpreted as a power of two, example MINIMAL_BATCH_SIZE=10 would mean an initial
+/// batch size of 2^10 → 1024 numbers
+const MINIMAL_BATCH_SIZE: u32 = 1;
 
 pub struct Space {
     batches: VecDeque<Batch>,
