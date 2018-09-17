@@ -253,6 +253,24 @@ mod tests {
     }
 
     #[bench]
+    fn test_4_performance(b: &mut Bencher) {
+        let log = get_root_logger(0);
+        b.iter(move || {
+            let log = log.clone();
+            Space::new(4, log);
+        });
+    }
+
+    #[bench]
+    fn test_10_performance(b: &mut Bencher) {
+        let log = get_root_logger(0);
+        b.iter(move || {
+            let log = log.clone();
+            Space::new(10, log);
+        });
+    }
+
+    #[bench]
     fn test_20_performance(b: &mut Bencher) {
         let log = get_root_logger(0);
         b.iter(move || {
