@@ -17,7 +17,7 @@ use slog::Drain;
 ///
 /// The value is interpreted as a power of two, example MINIMAL_BATCH_SIZE=10 would mean an initial
 /// batch size of 2^10 → 1024 numbers
-const MINIMAL_BATCH_SIZE: u32 = 1;
+const MINIMAL_BATCH_SIZE: u32 = 8;
 
 pub struct Space {
     batches: VecDeque<Batch>,
@@ -213,7 +213,7 @@ impl std::fmt::Debug for Batch {
 ///
 /// The first expected batch size is MINIMAL_BATCH_SIZE, the each batches double.
 fn batch_count(power: u32) -> u32 {
-    power.saturating_sub(MINIMAL_BATCH_SIZE - 1) + 1
+    power.saturating_sub(MINIMAL_BATCH_SIZE) + 1
 }
 
 /// Generate a root logger
@@ -241,15 +241,15 @@ mod tests {
 
     #[test]
     fn test_normal_batch_count() {
-        assert_eq!(batch_count(10), 2);
-        assert_eq!(batch_count(16), 8);
+        assert_eq!(batch_count(10), 3);
+        assert_eq!(batch_count(16), 9);
     }
 
     #[test]
     fn test_huge_batch_count() {
         // For values having more than usize size
-        assert_eq!(batch_count(128), 120);
-        assert_eq!(batch_count(4096), 4088);
+        assert_eq!(batch_count(128), 121);
+        assert_eq!(batch_count(4096), 4089);
     }
 
     #[bench]
