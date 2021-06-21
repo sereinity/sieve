@@ -9,7 +9,6 @@ extern crate slog_async;
 extern crate slog_term;
 use slog::Drain;
 
-
 /// As batches double from one to another, we need a starting point
 /// MINIMAL_BATCH_SIZE allow us to tune this initial batch size.
 /// Technically any number ≥ 1 is possible, but a huge batch size can reduce performance by
@@ -34,11 +33,12 @@ impl Space {
         for i in 0..batch_count(power) {
             debug!(log, "Allocationg {} size {}", i, MINIMAL_BATCH_SIZE + i);
             batches.push_back(Batch::new(
-                    MINIMAL_BATCH_SIZE + i,
-                    starter,
-                    log.new(o!(
+                MINIMAL_BATCH_SIZE + i,
+                starter,
+                log.new(o!(
                             "Start"=> starter,
-                            "Size" => MINIMAL_BATCH_SIZE + i))));
+                            "Size" => MINIMAL_BATCH_SIZE + i)),
+            ));
             starter += 2usize.pow(MINIMAL_BATCH_SIZE + i);
         }
         Space {
@@ -60,14 +60,15 @@ impl Space {
         let last = self.computed.last().unwrap();
         let longest = format!("{}", last.start + last.data.len() - 1);
         let longest = longest.len();
-        if ! dots {
+        if !dots {
             for batch in self.computed.iter() {
                 println!(
                     "{:0size$}-{:0size$}: {:#}",
                     batch.start,
                     batch.start + batch.data.len() - 1,
                     batch,
-                    size=longest);
+                    size = longest
+                );
             }
         } else {
             for batch in self.computed.iter() {
@@ -76,7 +77,8 @@ impl Space {
                     batch.start,
                     batch.start + batch.data.len() - 1,
                     batch,
-                    size=longest);
+                    size = longest
+                );
             }
         }
     }
@@ -91,7 +93,7 @@ struct Batch {
 impl Batch {
     fn new(power: u32, starter: usize, log: slog::Logger) -> Batch {
         Batch {
-            data: vec!(false; 2usize.pow(power)),
+            data: vec![false; 2usize.pow(power)],
             start: starter,
             log,
         }
@@ -117,34 +119,33 @@ impl Batch {
         }
     }
 
-    fn dot_stream<'a>(&'a self) -> impl Iterator<Item=char> + 'a {
-        self.data.iter()
-            .map(|i| {
-                if *i {
-                    ' '
-                } else {
-                    '.'
-                }
-            })
+    fn dot_stream<'a>(&'a self) -> impl Iterator<Item = char> + 'a {
+        self.data.iter().map(|i| if *i { ' ' } else { '.' })
     }
 
-    fn iter_primes<'a>(&'a self) -> impl Iterator<Item=usize> + 'a {
+    fn iter_primes<'a>(&'a self) -> impl Iterator<Item = usize> + 'a {
         let start = self.start;
-        self.data.iter().enumerate().filter(|&(_, item)| {!*item}).map(move |(i, _)| {i + start})
+        self.data
+            .iter()
+            .enumerate()
+            .filter(|&(_, item)| !*item)
+            .map(move |(i, _)| i + start)
     }
 
     fn run(&mut self, computed: &Vec<Batch>) {
         // 0 and 1 can't be marked automatically, mark them if there are included
         // then sieve on every number, not just prime from previous batches because there isn't
         if self.start <= 2 {
-            if self.start == 0 {  // mark 0 and perhaps 1 if included in this batch
+            if self.start == 0 {
+                // mark 0 and perhaps 1 if included in this batch
                 self.data[0] = true;
                 if self.data.len() > 1 {
                     self.data[1] = true;
                 }
-            } else if self.start == 1 {  // mark 1
+            } else if self.start == 1 {
+                // mark 1
                 self.data[0] = true;
-            }  // else nothing to mark
+            } // else nothing to mark
             let to = self.data.len();
             for i in 2..to {
                 if i.pow(2) > to {
@@ -167,7 +168,6 @@ impl Batch {
     }
 }
 
-
 impl std::fmt::Display for Batch {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         if f.alternate() {
@@ -183,12 +183,16 @@ impl std::fmt::Display for Batch {
     }
 }
 
-
 impl std::fmt::Debug for Batch {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let mut iter = self.iter_primes();
         if f.alternate() {
-            write!(f, "Batch({}, {}) {{", self.start, self.start + self.data.len() - 1)?;
+            write!(
+                f,
+                "Batch({}, {}) {{",
+                self.start,
+                self.start + self.data.len() - 1
+            )?;
             if let Some(first_prime) = iter.next() {
                 write!(f, "\n\t{}", first_prime)?;
             }
@@ -197,7 +201,12 @@ impl std::fmt::Debug for Batch {
             }
             write!(f, "\n}}")
         } else {
-            write!(f, "Batch({}, {}) {{", self.start, self.start + self.data.len() - 1)?;
+            write!(
+                f,
+                "Batch({}, {}) {{",
+                self.start,
+                self.start + self.data.len() - 1
+            )?;
             if let Some(first_prime) = iter.next() {
                 write!(f, "{}", first_prime)?;
             }
@@ -219,7 +228,7 @@ fn batch_count(power: u32) -> u32 {
 /// Generate a root logger
 ///
 /// Log levels are between 0 and 2 which means Info, Debug, Trace
-pub fn get_root_logger(digit_log_level: usize) -> slog::Logger{
+pub fn get_root_logger(digit_log_level: usize) -> slog::Logger {
     let lfilter = slog::Level::from_usize(digit_log_level + slog::Level::Info.as_usize()).unwrap();
     let decorator = slog_term::TermDecorator::new().build();
     let drain = slog_term::CompactFormat::new(decorator).build().fuse();
@@ -227,7 +236,6 @@ pub fn get_root_logger(digit_log_level: usize) -> slog::Logger{
     let drain = slog_async::Async::new(drain).build().fuse();
     slog::Logger::root(drain, o!())
 }
-
 
 #[cfg(test)]
 mod tests {
