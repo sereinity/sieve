@@ -186,13 +186,13 @@ impl std::fmt::Display for Batch {
 impl std::fmt::Debug for Batch {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let mut iter = self.iter_primes();
+        write!(
+            f,
+            "Batch({}, {}) {{",
+            self.start,
+            self.start + self.data.len() - 1
+        )?;
         if f.alternate() {
-            write!(
-                f,
-                "Batch({}, {}) {{",
-                self.start,
-                self.start + self.data.len() - 1
-            )?;
             if let Some(first_prime) = iter.next() {
                 write!(f, "\n\t{}", first_prime)?;
             }
@@ -201,12 +201,6 @@ impl std::fmt::Debug for Batch {
             }
             write!(f, "\n}}")
         } else {
-            write!(
-                f,
-                "Batch({}, {}) {{",
-                self.start,
-                self.start + self.data.len() - 1
-            )?;
             if let Some(first_prime) = iter.next() {
                 write!(f, "{}", first_prime)?;
             }
