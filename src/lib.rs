@@ -119,11 +119,11 @@ impl Batch {
         }
     }
 
-    fn dot_stream<'a>(&'a self) -> impl Iterator<Item = char> + 'a {
+    fn dot_stream(&self) -> impl Iterator<Item = char> + '_ {
         self.data.iter().map(|i| if *i { ' ' } else { '.' })
     }
 
-    fn iter_primes<'a>(&'a self) -> impl Iterator<Item = usize> + 'a {
+    fn iter_primes(&self) -> impl Iterator<Item = usize> + '_ {
         let start = self.start;
         self.data
             .iter()
