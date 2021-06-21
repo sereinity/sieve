@@ -3,8 +3,6 @@ extern crate clap;
 #[macro_use]
 extern crate slog;
 
-extern crate sieve;
-
 use clap::{App, Arg, ErrorKind};
 
 fn main() {

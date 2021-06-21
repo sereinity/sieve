@@ -1,12 +1,9 @@
 #![feature(test)]
-extern crate test;
 
 use std::collections::VecDeque;
 
 #[macro_use]
 extern crate slog;
-extern crate slog_async;
-extern crate slog_term;
 use slog::Drain;
 
 /// As batches double from one to another, we need a starting point
@@ -234,6 +231,7 @@ pub fn get_root_logger(digit_log_level: usize) -> slog::Logger {
 #[cfg(test)]
 mod tests {
     use super::*;
+    extern crate test;
     use test::Bencher;
 
     #[test]
