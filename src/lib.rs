@@ -132,7 +132,7 @@ impl Batch {
             .map(move |(i, _)| i + start)
     }
 
-    fn run(&mut self, computed: &Vec<Batch>) {
+    fn run(&mut self, computed: &[Batch]) {
         // 0 and 1 can't be marked automatically, mark them if there are included
         // then sieve on every number, not just prime from previous batches because there isn't
         if self.start <= 2 {
