@@ -8,29 +8,32 @@ extern crate sieve;
 use clap::{App, Arg, ErrorKind};
 
 fn main() {
-
     let matches = App::new("sieve")
         .about("Optimized Erathostenese's sieve")
         .author("Sereinity <sereinity@online.fr>")
         .version(crate_version!())
-        .arg(Arg::with_name("size")
-             .help("Analyze space size in power of two, ie 10, 24")
-             .index(1)
-            )
-        .arg(Arg::with_name("no-display")
-             .long("--no-display")
-             .short("-q")
-             .help("Don't display the result")
-             )
-        .arg(Arg::with_name("dots")
-             .long("--dots")
-             .help("Display dots instead of values")
-             )
-        .arg(Arg::with_name("v")
-             .short("v")
-             .multiple(true)
-             .help("Sets the level of verbosity")
-             )
+        .arg(
+            Arg::with_name("size")
+                .help("Analyze space size in power of two, ie 10, 24")
+                .index(1),
+        )
+        .arg(
+            Arg::with_name("no-display")
+                .long("--no-display")
+                .short("-q")
+                .help("Don't display the result"),
+        )
+        .arg(
+            Arg::with_name("dots")
+                .long("--dots")
+                .help("Display dots instead of values"),
+        )
+        .arg(
+            Arg::with_name("v")
+                .short("v")
+                .multiple(true)
+                .help("Sets the level of verbosity"),
+        )
         .get_matches();
 
     // First "v" adds debug, the second trace, trace is not available directly
@@ -41,11 +44,9 @@ fn main() {
     }
     let log = sieve::get_root_logger(digit_log_level);
 
-    let size = value_t!(matches, "size", u32).unwrap_or_else(|e|{
-        match e.kind {
-            ErrorKind::ArgumentNotFound => 16,
-            _ => e.exit(),
-        }
+    let size = value_t!(matches, "size", u32).unwrap_or_else(|e| match e.kind {
+        ErrorKind::ArgumentNotFound => 16,
+        _ => e.exit(),
     });
 
     let mut space = sieve::Space::new(size, log.new(o!("Space" => 1)));
