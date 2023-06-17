@@ -18,7 +18,7 @@ fn main() {
         .arg(
             Arg::with_name("no-display")
                 .long("--no-display")
-                .short("-q")
+                .short('q')
                 .help("Don't display the result"),
         )
         .arg(
@@ -28,8 +28,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("v")
-                .short("v")
-                .multiple(true)
+                .short('v')
                 .help("Sets the level of verbosity"),
         )
         .get_matches();
