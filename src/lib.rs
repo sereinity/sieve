@@ -166,7 +166,7 @@ impl Batch {
 }
 
 impl std::fmt::Display for Batch {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if f.alternate() {
             for prime in self.iter_primes() {
                 write!(f, "{} ", prime)?;
@@ -181,7 +181,7 @@ impl std::fmt::Display for Batch {
 }
 
 impl std::fmt::Debug for Batch {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut iter = self.iter_primes();
         write!(
             f,
