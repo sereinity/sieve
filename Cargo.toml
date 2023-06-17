@@ -1,11 +1,11 @@
 [package]
 name = "sieve"
 version = "0.1.0"
-authors = ["Benoît Marcelin <sereinity@sereinity.fr>"]
+authors = ["Sereinity <sereinity@sereinity.fr>"]
 edition = "2018"
 
 [dependencies]
-clap = "^2"
-slog = {version = "^2", features = ["max_level_trace"]}
-slog-async = "^2"
-slog-term = "^2"
+clap = {version = "4.3", features = ["derive"]}
+slog = {version = "2.7", features = ["max_level_trace"]}
+slog-async = "2.7"
+slog-term = "2.9"
