@@ -6,6 +6,6 @@ edition = "2018"
 
 [dependencies]
 clap = "^2"
-slog = {version = "^2", features = ["max_level_trace"]}
-slog-async = "^2"
-slog-term = "^2"
+slog = {version = "2.7", features = ["max_level_trace"]}
+slog-async = "2.7"
+slog-term = "2.9"
